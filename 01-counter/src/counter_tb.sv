@@ -30,10 +30,22 @@ module counter_tb();
     // Clock generation
     initial begin
         // Fill in code here
+        $dumpfile("dump.vcd"); // output: EPWave
+        $dumpvars(0, counter_tb);
+
+        clk = 0;
+        forever #5 clk = ~clk;   // 10ns
     end
 
     // Instance of student's module
     updown_counter dut(
+        .clk(clk),
+        .rst_n(rst_n),
+        .load(load),
+        .up_down(up_down),
+        .enable(enable),
+        .d_in(d_in),
+        .count(count)
     );
 
     initial begin
@@ -84,11 +96,37 @@ module counter_tb();
         end
 
         // Test Case 5: Reset during operation
+        enable = 1;
+        up_down = 1;
+        #10;
+        rst_n = 0;
+        #10;
+        rst_n = 1;
+        if (count !== 4'h0) begin
+            $display("Test 5 Failed: Reset behavior");
+            test_passed = 1'b0;
+        end
 
         // Test Case 6: Load while counting
+        d_in = 4'hA;
+        load = 1;
+        #10;
+        load = 0;
+        if (count !== 4'hA) begin
+            $display("Test 6 Failed: Load while counting");
+            test_passed = 1'b0;
+        end
 
         // Test Case 7: Disable while counting
-
+        enable = 1;
+        #10;
+        enable = 0;
+        #20;
+        if (count !== 4'hB) begin
+            $display("Test 7 Failed: Disable mid-count");
+            test_passed = 1'b0;
+        end
+    
         // Final check
         if (test_passed) begin
             $display("All tests passed!");
