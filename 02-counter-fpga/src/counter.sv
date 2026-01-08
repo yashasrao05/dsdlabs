@@ -39,7 +39,6 @@ module updown_counter(
             else
                 count <= count - 1;   // Count down
         end
-        
         // Else: hold value
     end
 endmodule
